@@ -1,19 +1,32 @@
-data "aws_availability_zones" "available"{}
-data "terraform_remote_state" "connection"{
-  backend="s3"
-  config={
-    bucket="${var.bucket}"
-    key="${var.bucket-key}/state"
-    region="${var.region}"
+terraform{
+  backend "s3"{
+    bucket="table2hmterraform"
+    key="modules/state"
+    region="eu-west-1"
   }
 }
+
+data "aws_availability_zones" "available"{}
+
 resource "aws_instance" "instance" {
-  count = "${var.total_instances}"
+  count = "${var.total_instances[var.enviro]}"
   ami = "${var.amis[var.region]}"
   instance_type = "t2.micro"
+  key_name = "ec2"
+  tags = {
+    Name = "biscotti"
+  }
   availability_zone="${data.aws_availability_zones.available.names[count.index]}"
   lifecycle{
     create_before_destroy = true
+  }
+  provisioner "remote-exec"{
+    inline = "${var.remote_command["frontend"]}"
+    connection{
+      type = "ssh"
+      private_key = "${file(var.private_key)}"
+      user = "ubuntu"
+    }
   }
 }
 

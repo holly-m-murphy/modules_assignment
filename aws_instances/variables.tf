@@ -6,23 +6,42 @@ variable "amis" {
   }
 }
 
+variable "script_type" {
+ default = "frontend"
+}
+
+variable "enviro" {
+  default = "stage"
+}
+
+variable "private_key" {
+  default = "/home/ubuntu/tacos"
+}
+
 variable "region" {
   default = "eu-west-1"
 }
 
 variable "total_instances"{
-  default="${var.env-name=="stage" ?  1:2}"
+  type="map"
+  default = {
+    stage = 1
+    prod = 2
+  }
 }
 
-variable "env-name" {
-  default="stage"
-  prod="prod"
+variable "remote_command"{
+  type = "map"
+  default = {
+    frontend = [
+      "sudo apt-get update",
+      "sudo apt-get install -y python"
+    ]
+    backend = [
+      "sudo apt-get update",
+      "sudo apt-get install -y tomcat8 tomcat8-docs tomcat8-admin tomcat8-examples"
+    ]
+  }
 }
 
-variable "bucket" {
-  default="table2hmterraform"
-}
 
-variable "bucket-key"{
-  default="modules"
-}
